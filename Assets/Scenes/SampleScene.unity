@@ -112,6 +112,18 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!114 &234448135 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
+    type: 3}
+  m_PrefabInstance: {fileID: 458288913}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cecce8d3f549de045bea5fd79de9e7cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &458288913
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -122,6 +134,16 @@ PrefabInstance:
     - target: {fileID: 1605939441684070, guid: ce5089f3caa5bb042a4d4c23a427bc82, type: 3}
       propertyPath: m_Name
       value: Fixed Joystick Left
+      objectReference: {fileID: 0}
+    - target: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
+        type: 3}
+      propertyPath: joystickMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
+        type: 3}
+      propertyPath: handleLimit
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 224070147403872398, guid: ce5089f3caa5bb042a4d4c23a427bc82,
         type: 3}
@@ -244,16 +266,6 @@ PrefabInstance:
       propertyPath: m_RaycastTarget
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
-        type: 3}
-      propertyPath: joystickMode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
-        type: 3}
-      propertyPath: handleLimit
-      value: 0.75
-      objectReference: {fileID: 0}
     - target: {fileID: 224251571662654508, guid: ce5089f3caa5bb042a4d4c23a427bc82,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -282,6 +294,16 @@ PrefabInstance:
     - target: {fileID: 1605939441684070, guid: ce5089f3caa5bb042a4d4c23a427bc82, type: 3}
       propertyPath: m_Name
       value: Fixed Joystick Right
+      objectReference: {fileID: 0}
+    - target: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
+        type: 3}
+      propertyPath: joystickMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
+        type: 3}
+      propertyPath: handleLimit
+      value: 0.75
       objectReference: {fileID: 0}
     - target: {fileID: 224070147403872398, guid: ce5089f3caa5bb042a4d4c23a427bc82,
         type: 3}
@@ -394,16 +416,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300000, guid: 48c0d4d6bebaa934384b07aa1e2f8184,
         type: 3}
-    - target: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
-        type: 3}
-      propertyPath: joystickMode
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
-        type: 3}
-      propertyPath: handleLimit
-      value: 0.75
-      objectReference: {fileID: 0}
     - target: {fileID: 224251571662654508, guid: ce5089f3caa5bb042a4d4c23a427bc82,
         type: 3}
       propertyPath: m_SizeDelta.x
@@ -669,6 +681,18 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!114 &1260600502 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 114859346367353968, guid: ce5089f3caa5bb042a4d4c23a427bc82,
+    type: 3}
+  m_PrefabInstance: {fileID: 515301140}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cecce8d3f549de045bea5fd79de9e7cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1771761541
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,6 +790,7 @@ GameObject:
   - component: {fileID: 1889725360}
   - component: {fileID: 1889725362}
   - component: {fileID: 1889725361}
+  - component: {fileID: 1889725363}
   m_Layer: 5
   m_Name: Panel
   m_TagString: Untagged
@@ -832,3 +857,17 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1889725359}
   m_CullTransparentMesh: 0
+--- !u!114 &1889725363
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1889725359}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9febd6fbd58c27d8da7a877d899e99b5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  joystick_Right: {fileID: 1260600502}
+  joystick_Left: {fileID: 234448135}
