@@ -9,7 +9,7 @@ public class Control_Spider : MonoBehaviour
     public Joystick joystick_Left;
     private float waitTime = 5.0f;
     private float timer = 0.0f;
-    private string sourceURL = "http://192.168.1.102:5000/mov";
+    private string sourceURL = "http://192.168.1.107:5000/mov";
     
     private string mode = "";
     private string data_before = "";
