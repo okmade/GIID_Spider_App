@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Control_Spider : MonoBehaviour
 {
@@ -9,14 +10,32 @@ public class Control_Spider : MonoBehaviour
     public Joystick joystick_Left;
     private float waitTime = 5.0f;
     private float timer = 0.0f;
-    private string sourceURL = "http://192.168.1.107:5000/mov";
+    //private string sourceURL = "http://192.168.1.117:5000/mov";
+    private string sourceURL;
     
     private string mode = "";
     private string data_before = "";
+    
+    private void OnEnable()
+    {
+        string Name = PlayerPrefs.GetString("name","Spider");
+        string Ip = PlayerPrefs.GetString("ip");
+        string Port = PlayerPrefs.GetString("port");
+
+        sourceURL = "http://" + Ip + ":" + Port + "/mov";
+    }
+    
     // Start is called before the first frame update
     void Start()
     {
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
         StartCoroutine(PostData());
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+            SceneManager.LoadScene("Menu");
     }
 
     // Update is called once per frame
@@ -47,14 +66,10 @@ public class Control_Spider : MonoBehaviour
                 }else{
                     yield return "No data";
                 }
-        
-                /*if(www.isNetworkError || www.isHttpError) {
-                    Debug.Log(www.error);
-                }
-                else {
-                    Debug.Log("Form upload complete!");
-                }*/
             }
+
+            //if (Input.GetKeyDown(KeyCode.Escape))
+            //    SceneManager.LoadScene("Menu");
         }
     }
 }

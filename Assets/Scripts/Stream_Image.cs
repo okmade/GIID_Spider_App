@@ -6,56 +6,105 @@ using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
+using UnityEngine.Networking;
 
 public class Stream_Image : MonoBehaviour
 {
     public RawImage frame; 
-    private string sourceURL = "http://192.168.1.109:5000/video_feed";
+    public Text message;
+    //private string sourceURL = "http://192.168.1.117:5000/video_feed";
+    //private string sourceURL1 = "http://192.168.1.117:5000/video_feed2";
+
+    private string sourceURL;
+    private string sourceURL1;
+    private string sourceURL2;
     private Texture2D texture;
     private Stream stream;
+    private string mode = "snapshots";       // snapshots or stream
+
+    private void OnEnable()
+    {
+        string Name = PlayerPrefs.GetString("name","Spider");
+        string Ip = PlayerPrefs.GetString("ip");
+        string Port = PlayerPrefs.GetString("port");
+        string streaming = PlayerPrefs.GetString("streaming","Y");
+
+        sourceURL = "http://" + Ip + ":" + Port + "/video_feed";
+        sourceURL1 = "http://" + Ip + ":" + Port + "/video_feed2";
+        sourceURL2 = "http://" + Ip + ":" + Port + "/";
+        if (streaming == "N"){
+            mode = "snapshots";
+        }else{
+            mode = "stream";
+        }
+
+        //Testing Internet COnnection
+        
+    }
+    
     // Start is called before the first frame update
     void Start()
     {
+        if (CheckConnection(sourceURL2) == false){
+            message.text = "Error to connect:\r " + sourceURL2;
+            mode = "Error";
+        }
+        
         texture = new Texture2D(2, 2);
-        // create HTTP request
-        HttpWebRequest req = (HttpWebRequest)WebRequest.Create(sourceURL);
-        //Optional (if authorization is Digest)
-        //req.Credentials = new NetworkCredential("", "");
-        // get response
-        WebResponse resp = req.GetResponse();
-        // get response stream
-        stream = resp.GetResponseStream();
         StartCoroutine(GetFrame());
     }
 
     IEnumerator GetFrame()
     {
-        Byte[] JpegData = new Byte[200000];
-
-        while (true)
-        {
-            int bytesToRead = FindLength(stream);
-            //print(bytesToRead);
-            if (bytesToRead == -1)
-            {
-                print("End of stream");
-                yield break;
+        if (mode == "snapshots"){
+            while (true){
+                using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(sourceURL1)){
+                    yield return uwr.SendWebRequest();
+                    if (uwr.isNetworkError || uwr.isHttpError){
+                        Debug.Log(uwr.error);
+                    }else{
+                        // Get downloaded asset bundle
+                        texture = DownloadHandlerTexture.GetContent(uwr);
+                        frame.texture = texture;
+                    }
+                }
             }
+        }else if (mode == "stream"){
+            // create HTTP request
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(sourceURL);
+            //Optional (if authorization is Digest)
+            //req.Credentials = new NetworkCredential("", "");
+            // get response
+            WebResponse resp = req.GetResponse();
+            // get response stream
+            stream = resp.GetResponseStream();
+            Byte[] JpegData = new Byte[200000];
 
-            int leftToRead = bytesToRead;
-
-            while (leftToRead > 0)
+            while (true)
             {
-                leftToRead -= stream.Read(JpegData, bytesToRead - leftToRead, leftToRead);
-                yield return null;
+                int bytesToRead = FindLength(stream);
+                //print(bytesToRead);
+                if (bytesToRead == -1)
+                {
+                    print("End of stream");
+                    yield break;
+                }
+
+                int leftToRead = bytesToRead;
+
+                while (leftToRead > 0)
+                {
+                    leftToRead -= stream.Read(JpegData, bytesToRead - leftToRead, leftToRead);
+                    yield return null;
+                }
+
+                MemoryStream ms = new MemoryStream(JpegData, 0, bytesToRead, false, true);
+
+                texture.LoadImage(ms.GetBuffer());
+                frame.texture = texture;
+                stream.ReadByte(); // CR after bytes
+                stream.ReadByte(); // LF after bytes
             }
-
-            MemoryStream ms = new MemoryStream(JpegData, 0, bytesToRead, false, true);
-
-            texture.LoadImage(ms.GetBuffer());
-            frame.texture = texture;
-            stream.ReadByte(); // CR after bytes
-            stream.ReadByte(); // LF after bytes
         }
     }
 
@@ -95,4 +144,24 @@ public class Stream_Image : MonoBehaviour
         }
         return -1;
     }
+    
+    bool CheckConnection(string URL)
+    {
+        try
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL);
+            request.Timeout = 1000;
+            request.Credentials = CredentialCache.DefaultNetworkCredentials;
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+    
+            if (response.StatusCode == HttpStatusCode.OK) return true;
+            else return false;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
 }
+
