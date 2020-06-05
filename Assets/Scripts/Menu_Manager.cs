@@ -9,6 +9,7 @@ public class Menu_Manager : MonoBehaviour
     public Animator anim_settings;
     public Animator anim_about;
     public Animator anim_mainMenu;
+    public Animator anim_exitMenu;
     private Animator PreSelected = null;
     public InputField Name;
     public InputField Ip;
@@ -22,8 +23,8 @@ public class Menu_Manager : MonoBehaviour
 
     private void OnEnable()
     {
-        Name.text = PlayerPrefs.GetString("name","SpiderBot");
-        Ip.text = PlayerPrefs.GetString("ip","192.168.1.106");
+        Name.text = PlayerPrefs.GetString("name","SpiderBot0");
+        Ip.text = PlayerPrefs.GetString("ip","10.0.0.236");
         Port.text = PlayerPrefs.GetString("port","5000");
         if (PlayerPrefs.GetString("streaming","Y") == "N"){
             StreamBt.isOn = false;
@@ -52,11 +53,13 @@ public class Menu_Manager : MonoBehaviour
 
     public void pause()
     {
-        if (pausedMenu.gameObject.activeInHierarchy == false)
+
+        if ((anim_exitMenu.gameObject.activeInHierarchy == false) || (anim_mainMenu.GetCurrentAnimatorStateInfo(0).IsName("Opened") == true))
         {
+            anim_exitMenu.gameObject.SetActive(true);
+            anim_exitMenu.SetBool("Open", false);
             anim_mainMenu.SetBool("Open",true);
             StartCoroutine(DisablePanelDeleyed(anim_mainMenu));
-            pausedMenu.gameObject.SetActive(true);
 
             if (PreSelected != null)
             {
@@ -65,8 +68,9 @@ public class Menu_Manager : MonoBehaviour
                 PreSelected = null;
             }
         }else{
+            anim_exitMenu.SetBool("Open", true);
+            StartCoroutine(DisablePanelDeleyed(anim_exitMenu));
             anim_mainMenu.SetBool("Open", false);
-            pausedMenu.gameObject.SetActive(false);
         }
     }
     public void SavePlayerPrefs ()
@@ -160,10 +164,10 @@ public class Menu_Manager : MonoBehaviour
 		while (!closedStateReached && wantToClose)
 		{
 			if (!anim.IsInTransition(0))
+            {
 				closedStateReached = anim.GetCurrentAnimatorStateInfo(0).IsName("Opened");
-
+            }
 			wantToClose = !anim.GetBool("Open");
-
 			yield return new WaitForEndOfFrame();
 		}
 	}

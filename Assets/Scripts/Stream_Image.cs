@@ -5,15 +5,13 @@ using System.Net;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Video;
+//using UnityEngine.Video;
 using UnityEngine.Networking;
 
 public class Stream_Image : MonoBehaviour
 {
     public RawImage frame; 
     public Text message;
-    //private string sourceURL = "http://192.168.1.117:5000/video_feed";
-    //private string sourceURL1 = "http://192.168.1.117:5000/video_feed2";
 
     private string sourceURL;
     private string sourceURL1;
@@ -24,14 +22,15 @@ public class Stream_Image : MonoBehaviour
 
     private void OnEnable()
     {
-        string Name = PlayerPrefs.GetString("name","Spider");
-        string Ip = PlayerPrefs.GetString("ip");
-        string Port = PlayerPrefs.GetString("port");
-        string streaming = PlayerPrefs.GetString("streaming","Y");
+        string Name = PlayerPrefs.GetString("name","SpiderBot0");
+        string Ip = PlayerPrefs.GetString("ip","10.0.0.236");
+        string Port = PlayerPrefs.GetString("port","5000");
+        string streaming = PlayerPrefs.GetString("streaming","N");
 
         sourceURL = "http://" + Ip + ":" + Port + "/video_feed";
         sourceURL1 = "http://" + Ip + ":" + Port + "/video_feed2";
         sourceURL2 = "http://" + Ip + ":" + Port + "/";
+        
         if (streaming == "N"){
             mode = "snapshots";
         }else{
@@ -39,17 +38,15 @@ public class Stream_Image : MonoBehaviour
         }
 
         //Testing Internet COnnection
-        
-    }
-    
-    // Start is called before the first frame update
-    void Start()
-    {
         if (CheckConnection(sourceURL2) == false){
             message.text = "Error to connect:\r " + sourceURL2;
             mode = "Error";
         }
-        
+    }
+    
+    // Start is called before the first frame update
+    void Start()
+    {        
         texture = new Texture2D(2, 2);
         StartCoroutine(GetFrame());
     }
@@ -105,7 +102,9 @@ public class Stream_Image : MonoBehaviour
                 stream.ReadByte(); // CR after bytes
                 stream.ReadByte(); // LF after bytes
             }
-        }
+        }//else if (mode == "stream"){
+
+        //}
     }
 
     int FindLength(Stream stream)
