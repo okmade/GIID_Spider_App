@@ -13,6 +13,7 @@ public class Control_Spider : MonoBehaviour
     public Joystick joystick_Right;
     public Joystick joystick_Left;
     public Slider Speed;
+    public Slider BodyHigh;
     public ToggleController A_D;
     public Text message;
     private float waitTime = 100000.0f;
@@ -35,11 +36,13 @@ public class Control_Spider : MonoBehaviour
             joystick_Right.gameObject.SetActive(false);
             joystick_Left.gameObject.SetActive(false);
             Speed.gameObject.SetActive(false);
+            BodyHigh.gameObject.SetActive(false);
             A_D.gameObject.SetActive(false);
         }else{
             joystick_Right.gameObject.SetActive(true);
             joystick_Left.gameObject.SetActive(true);
             Speed.gameObject.SetActive(true);
+            BodyHigh.gameObject.SetActive(true);
             A_D.gameObject.SetActive(true);
         }
     }
@@ -67,15 +70,15 @@ public class Control_Spider : MonoBehaviour
             //    timer = timer - waitTime;
 
                 float moveDistanceValue = Mathf.Sqrt((joystick_Left.Horizontal * joystick_Left.Horizontal) + (joystick_Left.Vertical * joystick_Left.Vertical));
-                float moveAngleValue = -(Mathf.Atan2(joystick_Left.Horizontal, joystick_Left.Vertical) * Mathf.Rad2Deg);
+                float moveAngleValue = (Mathf.Atan2(joystick_Left.Horizontal, joystick_Left.Vertical) * Mathf.Rad2Deg);
                 
                 string data = "";
                 
                 data = "?mode=Full&moveDistance=" + Math.Round((moveDistanceValue * 30),2) + 
                        "&moveAngle=" + Math.Round(moveAngleValue,2) + 
-                       "&timeScale=" + Math.Round(Speed.value,2) + 
+                       "&timeScale=" + Math.Round(((2.8 - (Speed.value * 2.7)) + 0.3),2) + 
                        "&turnAngle=" + Math.Round((joystick_Right.Horizontal * 15),2) + 
-                       "&offSetZ=" + Math.Round(((joystick_Right.Vertical * 30) + 50),2);
+                       "&offSetZ=" + Math.Round((((BodyHigh.value) * 80) + 20),2);
 
                 if (A_D.isOn)
                 {
@@ -102,7 +105,7 @@ public class Control_Spider : MonoBehaviour
                     UnityWebRequest www = UnityWebRequest.Post(sourceURL+data,"");
                     yield return www.SendWebRequest();
                 }
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSeconds((float)(0.01));
             //}
         }
     }

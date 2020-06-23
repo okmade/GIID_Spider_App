@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System;
 using System.Net;
+using System.Text;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
-//using UnityEngine.Video;
 using UnityEngine.Networking;
+using System.Threading;
 
 public class Stream_Image : MonoBehaviour
 {
@@ -19,6 +20,7 @@ public class Stream_Image : MonoBehaviour
     private Texture2D texture;
     private Stream stream;
     private string mode = "snapshots";       // snapshots or stream
+    private bool stop = false;
 
     private void OnEnable()
     {
@@ -46,7 +48,8 @@ public class Stream_Image : MonoBehaviour
     
     // Start is called before the first frame update
     void Start()
-    {        
+    {   
+        //Application.runInBackground = true;
         texture = new Texture2D(2, 2);
         StartCoroutine(GetFrame());
     }
