@@ -24,14 +24,17 @@ public class Stream_Image : MonoBehaviour
 
     private void OnEnable()
     {
-        string Name = PlayerPrefs.GetString("name","SpiderBot0");
-        string Ip = PlayerPrefs.GetString("ip","10.0.0.236");
-        string Port = PlayerPrefs.GetString("port","5000");
+        string Name = PlayerPrefs.GetString("name","SpiderBot");
+        string Ip = PlayerPrefs.GetString("ip","10.0.0.247");
+        string Port = PlayerPrefs.GetString("port","8080");
         string streaming = PlayerPrefs.GetString("streaming","N");
 
-        sourceURL = "http://" + Ip + ":" + Port + "/video_feed";
-        sourceURL1 = "http://" + Ip + ":" + Port + "/video_feed2";
-        sourceURL2 = "http://" + Ip + ":" + Port + "/";
+        sourceURL = "http://" + Ip + ":8080/?action=stream";
+        sourceURL1 = "http://" + Ip + ":8080/?action=snapshot";
+
+        //sourceURL = "http://" + Ip + ":" + Port + "/video_feed";
+        //sourceURL1 = "http://" + Ip + ":" + Port + "/video_feed2";
+        sourceURL2 = "http://" + Ip + ":" + Port + "/data";
         
         if (streaming == "N"){
             mode = "snapshots";

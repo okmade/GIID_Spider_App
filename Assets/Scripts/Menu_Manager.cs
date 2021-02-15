@@ -1,5 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
+using System.Net;
+using System.IO;
+using UnityEngine.Networking;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -16,6 +20,8 @@ public class Menu_Manager : MonoBehaviour
     public InputField Port;
     public ToggleController StreamBt;
     public Transform pausedMenu;
+    public Text playText;
+    public Text textDebug;
     private string NameData;
     private string IpData;
     private string PortData;
@@ -23,8 +29,8 @@ public class Menu_Manager : MonoBehaviour
 
     private void OnEnable()
     {
-        Name.text = PlayerPrefs.GetString("name","SpiderBot0");
-        Ip.text = PlayerPrefs.GetString("ip","10.0.0.236");
+        Name.text = PlayerPrefs.GetString("name","SpiderBot");
+        Ip.text = PlayerPrefs.GetString("ip","10.0.0.247");
         Port.text = PlayerPrefs.GetString("port","5000");
         if (PlayerPrefs.GetString("streaming","Y") == "N"){
             StreamBt.isOn = false;
@@ -46,6 +52,29 @@ public class Menu_Manager : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
+        textDebug.text = "Starting";
+        StartCoroutine(Connecting());
+    }
+    IEnumerator Connecting(){
+        while (true){
+                string sourceURL = "http://" + IpData + ":" + PortData + "/test";
+                using (UnityWebRequest uwr = UnityWebRequest.Get(sourceURL)){
+                    yield return uwr.SendWebRequest();
+                    if (uwr.isNetworkError || uwr.isHttpError){
+                        playText.text = "Connect SpiderBot";
+                        textDebug.text = "No Connected";
+                    }else{
+                        playText.text = "Play SpiderBot";
+                        textDebug.text = uwr.downloadHandler.text;
+                        //textDebug.text = "Connected";
+                    }
+                }
+            yield return new WaitForSeconds((float)(1.0));
+        }
+    }
     public void QuitApp()
     {
         Application.Quit();
@@ -83,17 +112,19 @@ public class Menu_Manager : MonoBehaviour
         }else{
             PlayerPrefs.SetString("streaming","Y");
         }
+        StreamBtData = PlayerPrefs.GetString("streaming");
         NameData = Name.text;
         IpData = Ip.text;
         PortData = Port.text;
-        StreamBtData = PlayerPrefs.GetString("streaming");
-        
         ChangeMenu ("Back");
     }
 
     public void ChangeScene (string scene)
     {
-        SceneManager.LoadScene(scene);
+        textDebug.text = "Button Pushed";
+        if (playText.text == "Play SpiderBot"){
+            SceneManager.LoadScene(scene);
+        }
     }
 
     public void ChangeMenu (string menu)
