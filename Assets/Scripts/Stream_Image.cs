@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.IO;
 using UnityEngine;
@@ -16,36 +17,40 @@ public class Stream_Image : MonoBehaviour
 
     private string sourceURL;
     private string sourceURL1;
-    private string sourceURL2;
     private Texture2D texture;
     private Stream stream;
-    private string mode = "snapshots";       // snapshots or stream
+    private string mode = "FLASK";       // FLASK, MJPG, TCP, ERROR
+    private string Name;
+    private string Ip;
+    private string Port;
+    private string VideoSource;
     private bool stop = false;
 
     private void OnEnable()
     {
-        string Name = PlayerPrefs.GetString("name","SpiderBot");
-        string Ip = PlayerPrefs.GetString("ip","10.0.0.247");
-        string Port = PlayerPrefs.GetString("port","8080");
-        string streaming = PlayerPrefs.GetString("streaming","N");
+        Name = PlayerPrefs.GetString("Name","SpiderBot");
+        Ip = PlayerPrefs.GetString("Ip","10.0.0.247");
+        Port = PlayerPrefs.GetString("Port","8080");
+        VideoSource = PlayerPrefs.GetString("VideoSource","FLASK");
 
-        sourceURL = "http://" + Ip + ":8080/?action=stream";
-        sourceURL1 = "http://" + Ip + ":8080/?action=snapshot";
-
-        //sourceURL = "http://" + Ip + ":" + Port + "/video_feed";
-        //sourceURL1 = "http://" + Ip + ":" + Port + "/video_feed2";
-        sourceURL2 = "http://" + Ip + ":" + Port + "/data";
-        
-        if (streaming == "N"){
-            mode = "snapshots";
-        }else{
-            mode = "stream";
+        string videomsg = "";
+        if (VideoSource == "FLASK"){
+            sourceURL1 = "http://" + Ip + ":" + Port + "/video_snapshoots";
+            videomsg = "Flask-TCP";
+        }else if (VideoSource == "MJPG"){
+            sourceURL1 = "http://" + Ip + ":8080/?action=snapshot";
+            videomsg = "mjpg-streamer";
+        }else if (VideoSource == "TCP"){
+            sourceURL1 = Ip;
+            videomsg = "Sockets-TCP";
         }
-
+        mode = VideoSource;
+        sourceURL = "http://" + Ip + ":" + Port + "/change_video?video_source=" + videomsg;
+        
         //Testing Internet COnnection
-        if (CheckConnection(sourceURL2) == false){
-            message.text = "Error to connect:\r " + sourceURL2;
-            mode = "Error";
+        if (CheckConnection(sourceURL) == false){
+            message.text = "Error to connect:\r " + sourceURL;
+            mode = "ERROR";
         }
     }
     
@@ -53,13 +58,13 @@ public class Stream_Image : MonoBehaviour
     void Start()
     {   
         //Application.runInBackground = true;
-        texture = new Texture2D(2, 2);
+        texture = new Texture2D(640, 480);
         StartCoroutine(GetFrame());
     }
 
     IEnumerator GetFrame()
     {
-        if (mode == "snapshots"){
+        if ((mode == "FLASK") || (mode == "MJPG")){
             while (true){
                 using (UnityWebRequest uwr = UnityWebRequestTexture.GetTexture(sourceURL1)){
                     yield return uwr.SendWebRequest();
@@ -72,90 +77,56 @@ public class Stream_Image : MonoBehaviour
                     }
                 }
             }
-        }else if (mode == "stream"){
-            // create HTTP request
-            HttpWebRequest req = (HttpWebRequest)WebRequest.Create(sourceURL);
-            //Optional (if authorization is Digest)
-            //req.Credentials = new NetworkCredential("", "");
-            // get response
-            WebResponse resp = req.GetResponse();
-            // get response stream
-            stream = resp.GetResponseStream();
-            Byte[] JpegData = new Byte[200000];
-
+        }else if (mode == "TCP"){
+            TcpClient client;
+            NetworkStream stream;
+            byte[] image = null;
+            bool m_NetworkRunning = true;
+            bool isImage = false;
             while (true)
             {
-                int bytesToRead = FindLength(stream);
-                //print(bytesToRead);
-                if (bytesToRead == -1)
+                try{
+                    client = new TcpClient();
+                    client.Connect(sourceURL1, 8081);           
+                    stream = client.GetStream();
+                    //Debug.Log("***** Client Connected to the server *****");
+                    if (m_NetworkRunning && client.Connected && stream.CanRead)
+                    {
+                        BinaryReader reader = new BinaryReader(stream);
+                        byte[] data0 = reader.ReadBytes(8);
+                        int length = Int32.Parse(Encoding.Default.GetString(data0));
+                        image = reader.ReadBytes(length);
+                        isImage = true;
+                    }else{
+                        isImage = false;
+                    }
+                    client.Close();
+                }
+                catch (Exception e)
                 {
-                    print("End of stream");
-                    yield break;
+                    Debug.LogException(e, this);
+                    isImage = false;
                 }
-
-                int leftToRead = bytesToRead;
-
-                while (leftToRead > 0)
+                if (isImage == true)
                 {
-                    leftToRead -= stream.Read(JpegData, bytesToRead - leftToRead, leftToRead);
-                    yield return null;
+                    //Debug.Log($"received-image byte: {image.Length}");
+                    //texture = new Texture2D(640, 480);
+                    texture.LoadImage(image);      
+                    frame.texture = texture;
+                    isImage = false;
+                    //Debug.Log("**** Image byte loaded... **** ");    
                 }
-
-                MemoryStream ms = new MemoryStream(JpegData, 0, bytesToRead, false, true);
-
-                texture.LoadImage(ms.GetBuffer());
-                frame.texture = texture;
-                stream.ReadByte(); // CR after bytes
-                stream.ReadByte(); // LF after bytes
-            }
-        }//else if (mode == "stream"){
-
-        //}
-    }
-
-    int FindLength(Stream stream)
-    {
-        int b;
-        string line = "";
-        int result = -1;
-        bool atEOL = false;
-        while ((b = stream.ReadByte()) != -1)
-        {
-            if (b == 10) continue; // ignore LF char
-            if (b == 13)
-            { // CR
-                if (atEOL)
-                {  // two blank lines means end of header
-                    stream.ReadByte(); // eat last LF
-                    return result;
-                }
-                if (line.StartsWith("Content-Length:"))
-                {
-                    result = Convert.ToInt32(line.Substring("Content-Length:".Length).Trim());
-                    //print(result);
-                }
-                else
-                {
-                    line = "";
-                }
-                atEOL = true;
-            }
-            else
-            {
-                atEOL = false;
-                line += (char)b;
-                //print(Convert.ToString(line));
+                yield return new WaitForSeconds((float)(0.01));
             }
         }
-        return -1;
     }
-    
+
     bool CheckConnection(string URL)
     {
         try
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL);
-            request.Timeout = 1000;
+            request.Timeout = 1500;
             request.Credentials = CredentialCache.DefaultNetworkCredentials;
             HttpWebResponse response = (HttpWebResponse)request.GetResponse();
     

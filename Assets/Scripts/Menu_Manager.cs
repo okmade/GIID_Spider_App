@@ -22,26 +22,42 @@ public class Menu_Manager : MonoBehaviour
     public Transform pausedMenu;
     public Text playText;
     public Text textDebug;
+    public Text sliderText;
+    public Slider VideoSel;
     private string NameData;
     private string IpData;
     private string PortData;
     private string StreamBtData;
+    private string VideoSource;
 
     private void OnEnable()
     {
-        Name.text = PlayerPrefs.GetString("name","SpiderBot");
-        Ip.text = PlayerPrefs.GetString("ip","10.0.0.247");
-        Port.text = PlayerPrefs.GetString("port","5000");
-        if (PlayerPrefs.GetString("streaming","Y") == "N"){
+        Name.text = PlayerPrefs.GetString("Name","SpiderBot");
+        Ip.text = PlayerPrefs.GetString("Ip","10.0.0.247");
+        Port.text = PlayerPrefs.GetString("Port","5000");
+        VideoSource = PlayerPrefs.GetString("VideoSource","FLASK");
+
+        sliderText.text = VideoSource;
+        if (VideoSource == "FLASK"){
+            VideoSel.value = 0;
+        }else if (VideoSource == "MJPG"){
+            VideoSel.value = 2;
+        }else if (VideoSource == "TCP"){
+            VideoSel.value = 1;
+        }
+
+        //////////////////////////////////////////////////////
+        if (PlayerPrefs.GetString("VideoSource") == "FLASK"){
             StreamBt.isOn = false;
         }else{
             StreamBt.isOn = true;
         }
+        StreamBtData = PlayerPrefs.GetString("VideoSource","FLASK");
+        //////////////////////////////////////////////////////
 
         NameData = Name.text;
         IpData = Ip.text;
         PortData = Port.text;
-        StreamBtData = PlayerPrefs.GetString("streaming","Y");
     }
     
     void Update()
@@ -58,6 +74,7 @@ public class Menu_Manager : MonoBehaviour
         textDebug.text = "Starting";
         StartCoroutine(Connecting());
     }
+
     IEnumerator Connecting(){
         while (true){
                 string sourceURL = "http://" + IpData + ":" + PortData + "/test";
@@ -75,6 +92,7 @@ public class Menu_Manager : MonoBehaviour
             yield return new WaitForSeconds((float)(1.0));
         }
     }
+
     public void QuitApp()
     {
         Application.Quit();
@@ -82,7 +100,6 @@ public class Menu_Manager : MonoBehaviour
 
     public void pause()
     {
-
         if ((anim_exitMenu.gameObject.activeInHierarchy == false) || (anim_mainMenu.GetCurrentAnimatorStateInfo(0).IsName("Opened") == true))
         {
             anim_exitMenu.gameObject.SetActive(true);
@@ -102,23 +119,37 @@ public class Menu_Manager : MonoBehaviour
             anim_mainMenu.SetBool("Open", false);
         }
     }
+
     public void SavePlayerPrefs ()
     {
-        PlayerPrefs.SetString("name",Name.text);
-        PlayerPrefs.SetString("ip",Ip.text);
-        PlayerPrefs.SetString("port",Port.text);
+        PlayerPrefs.SetString("Name",Name.text);
+        PlayerPrefs.SetString("Ip",Ip.text);
+        PlayerPrefs.SetString("Port",Port.text);
+        PlayerPrefs.SetString("VideoSource",sliderText.text);
+        //////////////////////////////////////////////////////
         if (StreamBt.isOn == false){
-            PlayerPrefs.SetString("streaming","N");
+            PlayerPrefs.GetString("VideoSource","FLASK");
         }else{
-            PlayerPrefs.SetString("streaming","Y");
+            PlayerPrefs.GetString("VideoSource","TCP");
         }
-        StreamBtData = PlayerPrefs.GetString("streaming");
+        StreamBtData = PlayerPrefs.GetString("VideoSource");
+        //////////////////////////////////////////////////////
         NameData = Name.text;
         IpData = Ip.text;
         PortData = Port.text;
         ChangeMenu ("Back");
     }
 
+    public void ChangeSlider ()
+    {
+        if (VideoSel.value == 0){
+            sliderText.text = "FLASK";
+        }else if (VideoSel.value == 2){
+            sliderText.text = "MJPG";
+        }else if (VideoSel.value == 1){
+            sliderText.text = "TCP";
+        }
+    }
     public void ChangeScene (string scene)
     {
         textDebug.text = "Button Pushed";
@@ -134,7 +165,8 @@ public class Menu_Manager : MonoBehaviour
             Name.text = NameData;
             Ip.text = IpData;
             Port.text = PortData;
-            if (StreamBtData == "N"){
+            //////////////////////////////////////////////////////
+            if (StreamBtData == "FLASK"){
                 if (StreamBt.isOn == true)
                 {
                     StreamBt.Switching();
@@ -145,6 +177,7 @@ public class Menu_Manager : MonoBehaviour
                     StreamBt.Switching();
                 }
             }
+            //////////////////////////////////////////////////////
             if (PreSelected != null)
             {
                 PreSelected.SetBool("Open",true);

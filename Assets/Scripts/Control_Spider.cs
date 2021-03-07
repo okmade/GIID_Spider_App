@@ -46,9 +46,9 @@ public class Control_Spider : MonoBehaviour
 
     private void OnEnable()
     {
-        string Name = PlayerPrefs.GetString("name","SpiderBot0");
-        string Ip = PlayerPrefs.GetString("ip","10.0.0.247");
-        string Port = PlayerPrefs.GetString("port","5000");
+        string Name = PlayerPrefs.GetString("Name","SpiderBot0");
+        string Ip = PlayerPrefs.GetString("Ip","10.0.0.247");
+        string Port = PlayerPrefs.GetString("Port","5000");
 
         sourceURL = "http://" + Ip + ":" + Port + "/test";
         sourceURL1 = "http://" + Ip + ":" + Port + "/data";
@@ -87,11 +87,12 @@ public class Control_Spider : MonoBehaviour
 
             // turnAngleValue
             temp = 0;
-            if (newData[0] != 0){temp = (maxData[2]/2);}else{temp = maxData[2];}
-            newData[2]= (float)Math.Round((joystick_Right.Horizontal * temp),2);
+            float temp1 = 0;
+            if (newData[0] != 0){temp = (maxData[2]/2);temp1 = -1;}else{temp = maxData[2];temp1 = 1;}
+            newData[2]= (float)Math.Round((joystick_Right.Horizontal * temp * temp1),2);
 
             // timeScaleValue
-            newData[3] = (float) Math.Round((((maxData[3] - 0.18) - (Speed.value * (maxData[3] - 0.18))) + 0.18),2);
+            newData[3] = (float) Math.Round((((maxData[3] - 0.1) - (Speed.value * (maxData[3] - 0.1))) + 0.1),2);
             PlayerPrefs.SetFloat("valueTimeScale",Speed.value);
 
             // offSetZValue
@@ -103,7 +104,7 @@ public class Control_Spider : MonoBehaviour
             {
                 newData[5] = 0; // offSetXValue Not Implemented Yet
                 newData[6] = 0; // offSetYValue Not Implemented Yet
-                newData[7] = (float) Math.Round((Input.acceleration.x * maxData[7]),2);
+                newData[7] = (float) Math.Round((Input.acceleration.x * maxData[7] * -1),2);
                 newData[8] = (float) Math.Round(((Input.acceleration.y - OffSetAccelY) * maxData[8]),2);
                 newData[9] = 0; // yawValue Not Implemented Yet
             }else{
@@ -126,7 +127,6 @@ public class Control_Spider : MonoBehaviour
 
             // gait
             newData[13] = (float) Math.Round(gaitValue,0);
-            PlayerPrefs.SetFloat("gait", gaitValue);
 
             for (int i = 0; i < 14; i++){
                 if ((i == 11) || (i == 12)) {
@@ -168,6 +168,7 @@ public class Control_Spider : MonoBehaviour
     {
         gaitValue = value;
         gait_text.text = "GAIT " + gaitValue + " SELECTED";
+        PlayerPrefs.SetFloat("gait", gaitValue);
     }
     IEnumerator CheckConnection()
     {
@@ -203,7 +204,7 @@ public class Control_Spider : MonoBehaviour
             maxData[0] =  PlayerPrefs.GetFloat("maxMoveDistance",30);
             maxData[1] =  PlayerPrefs.GetFloat("maxMoveAngle",0);
             maxData[2] =  PlayerPrefs.GetFloat("maxTurnAngle",15);
-            maxData[3] =  PlayerPrefs.GetFloat("maxTimeScale",5);
+            maxData[3] =  PlayerPrefs.GetFloat("maxTimeScale",3);
             maxData[4] =  PlayerPrefs.GetFloat("maxOffSetZ",120);
             maxData[5] =  PlayerPrefs.GetFloat("maxOffSetX",30);
             maxData[6] =  PlayerPrefs.GetFloat("maxOffSetY",30);
